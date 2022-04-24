@@ -6,7 +6,17 @@ import FeedBox from "../components/FeedBox";
 import Fade from "react-reveal/Fade";
 import FollowBox from "../components/FollowBox";
 import { useDispatch, useSelector } from "react-redux";
-import { TESTCALL_REQUEST } from "../reducers/user";
+import { 
+  GET_FEED_REQUEST,
+  GET_FEED_SUCCESS,
+  GET_FEED_FAILURE,
+  GET_FRIENDS_REQUEST,
+  GET_FRIENDS_SUCCESS,
+  GET_FRIENDS_FAILURE,
+  GET_LOGIN_USER_REQUEST,
+  GET_LOGIN_USER_SUCCESS,
+  GET_LOGIN_USER_FALURE,
+ } from "../reducers/user";
 
 
 const SearchWrapper = styled(Wrapper)`
@@ -70,18 +80,46 @@ const MateWrapper = styled(Wrapper)`
 
 const App = () => {
   const [feedWidth, setFeedWidth] = useState(65);
-  const {st_testCallLodading, st_testCallDone, st_testCallError, mjlist} = useSelector((state) => state.user);
+  const {st_testCallLodading, st_testCallDone, st_testCallError, me, friends, feed} = useSelector((state) => state.user);
   const dispatch = useDispatch();
 
+  console.log(feed)
+  const saveVirtualLogininfo = async () => {
+
+    await localStorage.setItem("mj_login_id", 2);
+
+  };
+
+
+    
   useEffect(() => {
+    saveVirtualLogininfo();
     dispatch({
-      type: TESTCALL_REQUEST,
+      type : GET_LOGIN_USER_REQUEST,
+      data : {
+        userId: parseInt(localStorage.getItem("mj_login_id")),
+      }
     });
+    
+    dispatch({
+      type: GET_FRIENDS_REQUEST,
+      data: {
+        userId: localStorage.getItem("mj_login_id"),
+      },
+    });
+    
+    dispatch({
+      type: GET_FEED_REQUEST,
+      data: {
+        userId: localStorage.getItem("mj_login_id"),
+      },
+    });
+
+
   }, []);
 
   useEffect(() => {
     if (st_testCallDone) {
-      console.log(mjlist);
     message.success("백엔드 서버와 통신이 성공했습니다.");
     }
   }, [st_testCallDone]);
@@ -98,43 +136,16 @@ const App = () => {
           </Form>
         </SearchWrapper>
 
+      
         <FeedWrapper dr="row" ju="space-around">
-          <FeedBox
-            feedWidth={feedWidth}
-            imgSrc="https://picsum.photos/300/300"
-          />
-          <FeedBox
-            feedWidth={feedWidth}
-            imgSrc="https://picsum.photos/300/301"
-          />
-          <FeedBox
-            feedWidth={feedWidth}
-            imgSrc="https://picsum.photos/300/302"
-          />
-          <FeedBox
-            feedWidth={feedWidth}
-            imgSrc="https://picsum.photos/300/303"
-          />
-          <FeedBox
-            feedWidth={feedWidth}
-            imgSrc="https://picsum.photos/300/304"
-          />
-          <FeedBox
-            feedWidth={feedWidth}
-            imgSrc="https://picsum.photos/300/305"
-          />
-          <FeedBox
-            feedWidth={feedWidth}
-            imgSrc="https://picsum.photos/300/306"
-          />
-          <FeedBox
-            feedWidth={feedWidth}
-            imgSrc="https://picsum.photos/300/307"
-          />
-          <FeedBox
-            feedWidth={feedWidth}
-            imgSrc="https://picsum.photos/300/308"
-          />
+      
+          {feed && feed.map((feed) => {
+            return (
+              <FeedBox imgSrc={feed.imgurl} content={feed.content}>
+
+              </FeedBox>
+            )
+          })}
         </FeedWrapper>
       </Wrapper>
 
@@ -146,13 +157,13 @@ const App = () => {
           <Wrapper dr="row">
             <Wrapper width="40%">
               <Fade bottom>
-                <ProfileImage src="https://picsum.photos/300/309" />
+                <ProfileImage src={me ? me.avatar : ""} />
               </Fade>
             </Wrapper>
             <Wrapper width="60%">
-              <ProfileTxt>dVidmz.XXO</ProfileTxt>
-              <ProfileTxt>1999.04.55</ProfileTxt>
-              <ProfileTxt>ㄴr는 ㄱr끔 눙물을 흘린ㄷr.</ProfileTxt>
+              <ProfileTxt>{me ? me.username : ""}</ProfileTxt>
+              <ProfileTxt>{me ? me.birth : ""}</ProfileTxt>
+              <ProfileTxt>{me ? me.mag : ""}</ProfileTxt>
             </Wrapper>
           </Wrapper>
         </Wrapper>
@@ -162,18 +173,18 @@ const App = () => {
           <InfoTitle>Social MATE</InfoTitle>
 
           <MateWrapper ju="flex-start">
-            <FollowBox imgSrc="https://picsum.photos/300/310">
-              팔로우 정보
-            </FollowBox>
-            <FollowBox imgSrc="https://picsum.photos/300/311">
-              팔로우 정보
-            </FollowBox>
-            <FollowBox imgSrc="https://picsum.photos/300/312">
-              팔로우 정보
-            </FollowBox>
-            <FollowBox imgSrc="https://picsum.photos/300/313">
-              팔로우 정보
-            </FollowBox>
+          {friends &&
+              friends.map((friend) => {
+                return (
+                  <FollowBox
+                    key={friend.id}
+                    imgSrc={friend.avatar}
+                    friendId={friend.username}
+                  >
+                    팔로우 정보
+                  </FollowBox>
+                );
+              })}
           </MateWrapper>
         </Wrapper>
       </Wrapper>

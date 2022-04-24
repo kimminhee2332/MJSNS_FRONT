@@ -30,12 +30,12 @@ const CancelTxt = styled.div`
   }
 `;
 
-const FollowBox = ({ imgSrc }) => {
+const FollowBox = ({ imgSrc, friendId }) => {
   return (
     <Wrapper dr="row" height="55px" ju="space-around" padding="0px 15px">
       <Wrapper dr="row" ju="flex-start">
         <ProfileImage src={imgSrc} />
-        <ViewId>아이디</ViewId>
+        <ViewId>{friendId}</ViewId>
       </Wrapper>
 
       <Wrapper al="flex-end">
